@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MyWinFormApp
 {
@@ -41,31 +42,8 @@ namespace MyWinFormApp
                 if (!File.Exists(value))
                 {
                     File.Create(value); //создаем файл "базы данных"
-                    //string createTables = File.ReadAllText(path);// создание-заполнение таблиц. находятся в файле Playlists.db.sql
-                    string createTables = "BEGIN TRANSACTION;" +
-                        "CREATE TABLE IF NOT EXISTS 'Playlists'(" +
-                        "'id'    INTEGER NOT NULL UNIQUE," +
-                        "'playlist'  TEXT NOT NULL," +
-                        "PRIMARY KEY('id' AUTOINCREMENT)" +
-                    "); " +
-                    "CREATE TABLE IF NOT EXISTS 'MediaTracks'(" +
-                        "'id'    INTEGER NOT NULL UNIQUE," +
-                        "'playlist_id'   INTEGER NOT NULL," +
-                        "'trackPath' TEXT NOT NULL," +
-                        "'trackName' TEXT NOT NULL," +
-                        "PRIMARY KEY('id' AUTOINCREMENT)" +
-                   "); " +
-                    "INSERT INTO 'Playlists'('id', 'playlist') VALUES"+
-                        "(1, 'Default')," +
-                        "(2, 'test');" +
-                    "INSERT INTO 'MediaTracks'('id', 'playlist_id', 'trackPath', 'trackName') VALUES" +
-                        "(1, 1, 'C:\\Users\\%USERPROFILE%\\desktop\\WindowsFormsApp2\\Sabaton - To Hell and back - Hobbit.mp4', 'Sabaton - To Hell and back - Hobbit')," +
-                        "(2, 1, 'C:\\Users\\%USERPROFILE%\\Downloads\\video_(39).mp4', 'qwe')," +
-                        "(3, 2, 'C:\\Users\\%USERPROFILE%\\desktop\\WindowsFormsApp2\\Sabaton - To Hell and back - Hobbit.mp4', 'asd')," +
-                        "(4, 2, 'C:\\Users\\%USERPROFILE%\\desktop\\WindowsFormsApp2\\Sabaton - To Hell and back - Hobbit.mp4', 'zxc');" +
-                    "COMMIT;";
-                    ExecuteQuery(createTables);   //выполнить запрос
-                    throw new FileNotFoundException();
+
+                    //throw new FileNotFoundException();    //больше ненужен, так как я создаю новую базу
                 }
                 _dbPath = value;
             }
@@ -74,11 +52,48 @@ namespace MyWinFormApp
                 return _dbPath;
             }
         }
+        private void initTable()
+        {
+            //string createTables = File.ReadAllText(path);// создание-заполнение таблиц. находятся в файле Playlists.db.sql
+            string createTables = "BEGIN TRANSACTION;" +
+                "CREATE TABLE IF NOT EXISTS 'Playlists'(" +
+                "'id'    INTEGER NOT NULL UNIQUE," +
+                "'playlist'  TEXT NOT NULL," +
+                "PRIMARY KEY('id' AUTOINCREMENT)" +
+            "); " +
+            "CREATE TABLE IF NOT EXISTS 'MediaTracks'(" +
+                "'id'    INTEGER NOT NULL UNIQUE," +
+                "'playlist_id'   INTEGER NOT NULL," +
+                "'trackPath' TEXT NOT NULL," +
+                "'trackName' TEXT NOT NULL," +
+                "PRIMARY KEY('id' AUTOINCREMENT)" +
+           "); " +
+            "INSERT INTO 'Playlists'('id', 'playlist') VALUES" +
+                "(1, 'Default')," +
+                "(2, 'test');" +
+            "INSERT INTO 'MediaTracks'('id', 'playlist_id', 'trackPath', 'trackName') VALUES" +
+                "(1, 1, 'C:\\Users\\%USERPROFILE%\\desktop\\WindowsFormsApp2\\Sabaton - To Hell and back - Hobbit.mp4', 'Sabaton - To Hell and back - Hobbit')," +
+                "(2, 1, 'C:\\Users\\%USERPROFILE%\\Downloads\\video_(39).mp4', 'qwe')," +
+                "(3, 2, 'C:\\Users\\%USERPROFILE%\\desktop\\WindowsFormsApp2\\Sabaton - To Hell and back - Hobbit.mp4', 'asd')," +
+                "(4, 2, 'C:\\Users\\%USERPROFILE%\\desktop\\WindowsFormsApp2\\Sabaton - To Hell and back - Hobbit.mp4', 'zxc');" +
+            "COMMIT;";
+            //выполнить запрос
+            if (ExecuteNonQuery(createTables) < 4)
+            {
+                MessageBox.Show("Error");
+                //throw new FileNotFoundException();
+            }
+        }
+        //  -----------------------------------------------------------------------------------------------
         public SQLiteTableManager(string dbPath)
         {
             DBPath = dbPath;
             _connection = new SQLiteConnection($"Data Source={_dbPath}; Version=3;");
             _tables = new List<string>();
+            // существуют ли таблицы
+            if (!(DoesTableExist("Playlists") && DoesTableExist("MediaTracks"))) {
+                initTable();
+            }
 
             readTableNames();
         }
@@ -111,7 +126,8 @@ namespace MyWinFormApp
             }
             if (_tables.Count < 1)
             {
-                throw new Exception("Database is empty.");
+                //throw new Exception("Database is empty."); //если база пустая то ее нужно проинитить ы конструкторе
+                return false;
             }
             foreach (string name in _tables)
             {

@@ -43,7 +43,7 @@ namespace MyWinFormApp
 
         private void PlayListForm_Load(object sender, EventArgs e)
         {
-            PlaylistsModel playlistsModel = new PlaylistsModel("C:\\Users\\tortl\\source\\repos\\WindowsFormsApp2\\WindowsFormsApp2\\bin\\Debug\\Playlists.db");
+            PlaylistsModel playlistsModel = new PlaylistsModel($"{Environment.CurrentDirectory}\\Playlists.db");
             this.panelBox.Controls.Add(playListBox);
             playListBox.Dock = DockStyle.Fill;
             playListBox.BackColor = Color.Red;
