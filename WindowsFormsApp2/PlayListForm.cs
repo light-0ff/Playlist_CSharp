@@ -33,6 +33,8 @@ namespace MyWinFormApp
             playListBox = new PlayListBox();
             this.parentForm = applicationForm;
             //MessageBox.Show($"{Environment.CurrentDirectory}\\Playlists.db");
+            //MessageBox.Show($"{System.IO.Directory.GetParent(System.IO.Directory.GetParent(Environment.CurrentDirectory).FullName)}\\");
+           
 
             this.pathDB = $"{Environment.CurrentDirectory}\\Playlists.db";
             this.playlistsModel = new PlaylistsModel(pathDB);
